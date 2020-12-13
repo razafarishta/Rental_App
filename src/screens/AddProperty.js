@@ -30,18 +30,23 @@ import auth from '@react-native-firebase/auth';
 // import ImageCropPicker from 'react-native-image-crop-picker';
 import ImagePicker from 'react-native-image-picker';
 import Spinner from '../components/Spinner';
+import {connect} from 'react-redux';
 const AddProperty = (props) => {
   var options = {
     title: 'UPLOAD PHOTO',
     takePhotoButtonTitle: 'Take photo with your camera',
-    chooseFromLibraryButtonTitle: 'choose photo from library',
+    chooseFromLibraryButtonTitle: 'Choose photo from library',
   };
   var sourcePath = '';
-  var downloadURLGlobal = '';
-  let actionSheet = useRef();
+  // var downloadURLGlobal = '';
+  // let actionSheet = useRef();
   // var ActionSheet = '';
   const [city, setCity] = useState('');
+  const [address, setaddress] = useState('');
   const [type, setType] = useState('');
+  const [sell, setsell] = useState(false);
+  const [rent, setrent] = useState(false);
+
   const [purpose, setPurpose] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -57,10 +62,10 @@ const AddProperty = (props) => {
   const [loading, setloading] = useState(false);
   const [loader, setloader] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [imageUri, setImageUri] = useState('');
+  // const [imageUri, setImageUri] = useState('');
   const [imageData, setImageData] = useState('');
   const [visible, setvisible] = useState(false);
-  const [percentUploaded, setpercentUploaded] = useState('');
+  // const [percentUploaded, setpercentUploaded] = useState('');
 
   // const uploadData = () => {
   //   setloader({loader: true});
@@ -192,6 +197,9 @@ const AddProperty = (props) => {
       .collection('Property')
       .add({
         city: city,
+        address: address,
+        sell: sell,
+        rent: rent,
         title: title,
         description: description,
         area: area,
@@ -202,6 +210,7 @@ const AddProperty = (props) => {
         imageUrl: imageData,
         users: {
           uid: auth().currentUser.uid,
+          name: props.name,
         },
       })
       .then(() => {
@@ -302,10 +311,12 @@ const AddProperty = (props) => {
             <Spinner />
           </View>
         ) : null}
-        <View style={{backgroundColor: '#fff', marginTop: 5}}>
+        <View style={{backgroundColor: '#fff', marginTop: 5, borderRadius: 10}}>
           <View style={{flexDirection: 'column'}}>
             <View style={{flexDirection: 'row'}}>
-              <Text style={{fontSize: 18}}>Locations</Text>
+              <Text style={{fontSize: 18, paddingLeft: 5, fontWeight: 'bold'}}>
+                Location
+              </Text>
             </View>
           </View>
           <View style={{flexDirection: 'column'}}>
@@ -315,7 +326,7 @@ const AddProperty = (props) => {
                 // marginTop: 5,
                 justifyContent: 'space-between',
                 margin: 5,
-                backgroundColor: 'green',
+                // backgroundColor: 'green',
               }}>
               <Text style={{fontSize: 16}}>Adding in </Text>
 
@@ -343,14 +354,18 @@ const AddProperty = (props) => {
                 marginRight: 5,
                 marginBottom: 10,
               }}
-              placeholder="Search Location"
+              placeholder="Add Address"
+              onChangeText={(address) => setaddress(address)}
             />
           </View>
         </View>
 
-        <View style={{backgroundColor: '#fff', marginTop: 10}}>
+        <View
+          style={{backgroundColor: '#fff', marginTop: 10, borderRadius: 10}}>
           <View style={{flexDirection: 'row'}}>
-            <Text style={{fontSize: 18}}>Purpose</Text>
+            <Text style={{fontSize: 16, fontWeight: 'bold', marginLeft: 5}}>
+              Purpose
+            </Text>
           </View>
 
           <View
@@ -362,17 +377,33 @@ const AddProperty = (props) => {
 
               // alignItems: 'center',
             }}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: 'grey',
-                borderRadius: 15,
-                width: 70,
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: 5,
-              }}>
-              <Text>Sell</Text>
-            </TouchableOpacity>
+            {sell == true ? (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'green',
+                  borderRadius: 15,
+                  width: 70,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: 5,
+                }}
+                onPress={() => setsell(true)}>
+                <Text>Sell</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'blue',
+                  borderRadius: 15,
+                  width: 70,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: 5,
+                }}
+                onPress={() => setsell(true)}>
+                <Text>Sell</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={{
@@ -381,11 +412,12 @@ const AddProperty = (props) => {
                 width: 70,
                 justifyContent: 'center',
                 alignItems: 'center',
-              }}>
+              }}
+              onPress={() => setrent(true)}>
               <Text>Rent</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 backgroundColor: 'grey',
                 borderRadius: 15,
@@ -394,13 +426,15 @@ const AddProperty = (props) => {
                 alignItems: 'center',
               }}>
               <Text>Wanted</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
         <View style={{marginTop: 10, backgroundColor: '#fff'}}>
           <View style={{flexDirection: 'row'}}>
-            <Text>Property Details</Text>
+            <Text style={{fontSize: 16, fontWeight: 'bold'}}>
+              Property Details
+            </Text>
           </View>
 
           <TextInput
@@ -412,7 +446,7 @@ const AddProperty = (props) => {
           />
 
           <TextInput
-            style={{borderBottomWidth: 1}}
+            style={{borderBottomWidth: 1, marginBottom: 8}}
             placeholder="Property Description"
             // onChangeText={(description) => onDescriptionChange(description)}
             onChangeText={(description) => setDescription(description)}
@@ -420,11 +454,13 @@ const AddProperty = (props) => {
           />
         </View>
 
-        <View style={{backgroundColor: '#fff', marginTop: 10}}>
+        <View style={{backgroundColor: '#fff', marginTop: 10, borderRadius: 5}}>
           <View style={{flexDirection: 'row'}}>
-            <Text>Area</Text>
+            <Text style={{marginLeft: 5, fontWeight: 'bold', fontSize: 16}}>
+              Area
+            </Text>
           </View>
-          <View style={{flexDirection: 'row', marginTop: 10}}>
+          <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 8}}>
             <TextInput
               style={{
                 width: 160,
@@ -441,11 +477,13 @@ const AddProperty = (props) => {
           </View>
         </View>
 
-        <View style={{backgroundColor: '#fff', marginTop: 10}}>
+        <View style={{backgroundColor: '#fff', marginTop: 10, borderRadius: 8}}>
           <View style={{flexDirection: 'row'}}>
-            <Text>price</Text>
+            <Text style={{marginLeft: 5, fontSize: 16, fontWeight: 'bold'}}>
+              price
+            </Text>
           </View>
-          <View style={{flexDirection: 'row', marginTop: 10}}>
+          <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 8}}>
             <TextInput
               style={{
                 width: 160,
@@ -463,8 +501,15 @@ const AddProperty = (props) => {
         </View>
 
         <View
-          style={{backgroundColor: '#fff', marginTop: 10, marginBottom: 10}}>
-          <Text style={{fontWeight: 'bold', fontSize: 18}}>BedRoom(s)</Text>
+          style={{
+            backgroundColor: '#fff',
+            marginTop: 10,
+            marginBottom: 10,
+            borderRadius: 5,
+          }}>
+          <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 5}}>
+            BedRoom(s)
+          </Text>
           <TextInput
             placeholder="Type number of Bedrooms"
             style={{borderBottomWidth: 1, marginBottom: 10}}
@@ -475,8 +520,15 @@ const AddProperty = (props) => {
         </View>
 
         <View
-          style={{backgroundColor: '#fff', marginTop: 10, marginBottom: 10}}>
-          <Text style={{fontWeight: 'bold', fontSize: 18}}>BathRoom(s)</Text>
+          style={{
+            backgroundColor: '#fff',
+            marginTop: 10,
+            marginBottom: 10,
+            borderRadius: 5,
+          }}>
+          <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 5}}>
+            BathRoom(s)
+          </Text>
           <TextInput
             placeholder="Type number of Bathrooms"
             style={{borderBottomWidth: 1, marginBottom: 10}}
@@ -487,8 +539,13 @@ const AddProperty = (props) => {
         </View>
 
         <View
-          style={{backgroundColor: '#fff', marginTop: 10, marginBottom: 10}}>
-          <Text style={{fontWeight: 'bold', fontSize: 18}}>
+          style={{
+            backgroundColor: '#fff',
+            marginTop: 10,
+            marginBottom: 10,
+            borderRadius: 5,
+          }}>
+          <Text style={{fontWeight: 'bold', fontSize: 18, marginLeft: 5}}>
             Contact Details
           </Text>
           <TextInput
@@ -504,10 +561,11 @@ const AddProperty = (props) => {
             style={{justifyContent: 'center', alignItems: 'center'}}
             onPress={() => openPic()}>
             <Image
-              style={{backgroundColor: 'green', width: 100, height: 100}}
+              source={require('../assets/home.png')}
+              style={{width: 100, height: 100}}
             />
+            <Text>please upload picture</Text>
           </TouchableOpacity>
-          <Text>please upload picture</Text>
         </View>
         <View>
           <TouchableOpacity
@@ -545,5 +603,10 @@ const AddProperty = (props) => {
     </View>
   );
 };
-
-export default AddProperty;
+const mapStateToProps = ({auth}) => {
+  const {name} = auth;
+  return {
+    name,
+  };
+};
+export default connect(mapStateToProps)(AddProperty);

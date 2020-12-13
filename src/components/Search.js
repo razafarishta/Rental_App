@@ -2,7 +2,7 @@ import React from 'react';
 import {Text, TextInput, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const Search = () => {
+const Search = ({onChangeText, value}) => {
   return (
     <View
       style={{
@@ -29,6 +29,8 @@ const Search = () => {
         }}
         placeholder="Type Location"
         placeholderTextColor="#000"
+        onChangeText={onChangeText}
+        value={value}
       />
     </View>
   );

@@ -36,7 +36,7 @@ export const loginUser = ({email, password}, navigation) => {
           .get()
           .then(() => {
             AsyncStorage.setItem('userData', JSON.stringify(user)).then(() => {
-              console.log('Successfully');
+              console.log(user, 'Successfully');
               // navigation.navigate('Root', {screen: 'Dashboard'});
               // props.navigation.dispatch(StackActions.replace('Main'));
             });

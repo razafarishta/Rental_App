@@ -9,6 +9,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
+import {SearchBar} from 'react-native-elements';
 import Search from '../components/Search';
 import {logout} from '../redux/actions/Auth';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
@@ -16,6 +17,7 @@ import {FoodCard} from '../components/FoodCard';
 import {ScrollView} from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import auth, {firebase} from '@react-native-firebase/auth';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {StackActions} from '@react-navigation/native';
 import {connect} from 'react-redux';
@@ -25,26 +27,61 @@ const {height, width, fontScale} = Dimensions.get('window');
 // var data = [];
 const MainScreen = (props) => {
   const [data, setdata] = useState([]);
+  const [search, setsearch] = useState('');
+  const [filterData, setfilterData] = useState([]);
   const [user, setuser] = useState({});
-  // var data = [];
+  const [searchValue, setsearchValue] = useState('');
+  var arrayholder = [];
 
-  // const {item} = props
   useEffect(() => {
     var alldata = [];
     firestore()
       .collection('Property')
-      .where('users.uid', '==', auth().currentUser.uid)
+      // .where('users.uid', '==', auth().currentUser.uid)
       .onSnapshot((querySnapshot) => {
         querySnapshot.forEach(function (doc) {
           console.log('data', doc.data());
 
           alldata.push({...doc.data()});
+
           setdata(alldata);
         });
 
-        // data = [];
+        alldata = [];
       });
   }, []);
+
+  const Favourite = (item) => {
+    console.log('favo item', item);
+    firestore()
+      .collection('Favourite')
+      .doc(auth().currentUser.uid)
+      .get()
+      .then((snapshot) => {
+        // console.log('favo snap', snapshot);
+        // if (snapshot.exists) {
+        //   firestore()
+        //     .collection('Favourite')
+        //     .doc(auth().currentUser.uid)
+        //     .update({
+        //       favourite: firestore.FieldValue.arrayUnion(item.users.docId),
+        //     })
+        //     .then(() => {
+        //       alert('This post is favourite');
+        //     });
+        // } else {
+        firestore()
+          .collection('Favourite')
+          .doc(auth().currentUser.uid)
+          .set({
+            favourite: firestore.FieldValue.arrayUnion(item.users.docId),
+          })
+          .then(() => {
+            alert('This post is Bookmarker');
+          });
+        // }
+      });
+  };
   const handleLogout = () => {
     // const {navigation, logout} = props;
     // logout(navigation);
@@ -58,201 +95,172 @@ const MainScreen = (props) => {
       });
   };
 
-  // const [data, setData] = useState([
-  //   {
-  //     rent: '5000',
-  //     pic: require('../assets/property.png'),
-  //     details: '1 Bhk Resdential for sale',
-  //     id: '1',
-  //   },
-  //   {
-  //     rent: '5000',
-  //     pic: require('../assets/property.png'),
-  //     details: '1 Bhk Resdential for sale',
-  //     id: '2',
-  //   },
-  //   {
-  //     rent: '5000',
-  //     pic: require('../assets/property.png'),
-  //     details: '1 Bhk Resdential for sale',
-  //     id: '3',
-  //   },
-  //   {
-  //     rent: '5000',
-  //     pic: require('../assets/property.png'),
-  //     details: '1 Bhk Resdential for sale',
-  //     id: '4',
-  //   },
-  // ]);
+  const updateSearch = (search) => {
+    setsearch({search});
+    if (search === '') {
+      setdata({data});
+    } else {
+      let List = data.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase()),
+      );
 
+      setdata({data: List});
+    }
+  };
   const SecondRoute = () => (
     <View style={{flex: 1, backgroundColor: 'white'}}>
-      <FlatList
-        // data={orderData2}
-        // data={data}
-        // style={{marginBottom:29}}
-        horizontal
-        // showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 20}}
-        renderScrollComponent={(props) => <ScrollView {...props} />}
-        renderItem={({item, separators, index}) => {
-          return (
-            <TouchableOpacity
-              // onPress={() => this.props.navigation.navigate("OrderDetail", { itemData: item })}
-              style={{
-                paddingTop: 10,
-                backgroundColor: '#FFF',
-                marginTop: 40,
-                width: '90%',
-                alignSelf: 'center',
-                borderRadius: 20,
-                shadowOffset: {width: 0.5, height: 0.5},
-                shadowOpacity: 0.2,
-                elevation: 5,
-              }}>
-              <View
-                style={{
-                  marginLeft: 20,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginRight: 20,
-                }}>
-                <Text style={{fontSize: 20, fontWeight: 'bold'}}>ORDER#</Text>
-                <TouchableOpacity
-                  style={{
-                    // backgroundColor: 'red',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 7,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    Availabale
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {/* <OrderCard item={item} /> */}
-            </TouchableOpacity>
-          );
-        }}
-      />
-    </View>
-  );
-
-  const FourthRoute = () => (
-    <View style={{flex: 1}}>
-      <FlatList
-        // data={orderData2}
-        // style={{marginBottom:29}}
-        contentContainerStyle={{paddingBottom: 20}}
-        renderItem={({item, separators, index}) => {
-          return (
-            <TouchableOpacity
-              // onPress={() => this.props.navigation.navigate("OrderDetail", { itemData: item })}
-              style={{
-                paddingTop: 10,
-                // backgroundColor: 'red',
-                marginTop: 40,
-                width: '90%',
-                alignSelf: 'center',
-                borderRadius: 20,
-                shadowOffset: {width: 0.5, height: 0.5},
-                shadowOpacity: 0.2,
-                elevation: 5,
-              }}>
-              <View
-                style={{
-                  marginLeft: 20,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginRight: 20,
-                }}>
-                <Text style={{fontSize: 20, fontWeight: 'bold'}}>ORDER#</Text>
-                <TouchableOpacity
-                  style={{
-                    // backgroundColor: 'red',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 7,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    Availabale
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {/* <OrderCard item={item} /> */}
-            </TouchableOpacity>
-          );
-        }}
-      />
-    </View>
-  );
-  const {item} = props;
-  const FirstRoute = () => (
-    <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
-      <View style={{marginTop: 15, marginLeft: 10}}>
+      <View style={{marginTop: 10}}>
         <Text style={{color: '#A8A8A8', fontWeight: 'bold', fontSize: 16}}>
-          1 BHK Apartments near you
+          Rent apartments near you
         </Text>
-        {/* <Text style={{marginTop: 50, color: '#000'}}>{item.title}</Text> */}
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
           data={data}
           renderItem={({item}) => {
-            console.log('dataaa', data);
-            console.log('item', item);
+            // console.log('dataaa', data);
+            // console.log('item', item);
             return (
               <View>
-                <FoodCard>
-                  {/* {props.imageUrl.uri ?} */}
-                  <TouchableOpacity
-                    onPress={() => props.navigation.navigate('Rent', {item})}>
-                    <Image
-                      // source={item.imageUrl}
-                      source={{uri: item.imageUrl}}
-                      style={{width: 200, height: 200, borderRadius: 10}}
-                      resizeMode="cover"
-                    />
-                    <Text style={{padding: 5, fontWeight: 'bold'}}>
-                      {item.price}
-                    </Text>
-                    <Text style={{padding: 5, color: '#C6C6C6'}}>
-                      {item.title}
-                    </Text>
-                    <Text style={{color: '#C6C6C6', padding: 5}}>
-                      apartment for sale
-                    </Text>
-                  </TouchableOpacity>
-                </FoodCard>
+                {item.rent ? (
+                  <FoodCard>
+                    <TouchableOpacity
+                      onPress={() => props.navigation.navigate('Rent', {item})}>
+                      <Image
+                        source={{uri: item.imageUrl}}
+                        style={{width: 200, height: 200, borderRadius: 10}}
+                        resizeMode="cover"
+                      />
+                      <Text style={{padding: 5, fontWeight: 'bold'}}>
+                        {item.price}
+                      </Text>
+                      <Text style={{padding: 5, color: '#C6C6C6'}}>
+                        {item.title}
+                      </Text>
+
+                      <Text style={{color: '#C6C6C6', padding: 5}}>
+                        apartment for rent
+                      </Text>
+                    </TouchableOpacity>
+                  </FoodCard>
+                ) : null}
               </View>
             );
           }}
         />
+      </View>
+    </View>
+  );
+
+  const FourthRoute = () => <View style={{flex: 1}}></View>;
+  const {item} = props;
+  const FirstRoute = () => (
+    <ScrollView
+      style={{flex: 1, backgroundColor: '#fff'}}
+      showsVerticalScrollIndicator={false}>
+      <View style={{marginTop: 15, marginLeft: 5}}>
+        <Text style={{color: '#A8A8A8', fontWeight: 'bold', fontSize: 16}}>
+          1 BHK Apartments near you
+        </Text>
+        {/* <Text style={{marginTop: 50, color: '#000'}}>{item.title}</Text> */}
+        {/* {item.sell == true ? ( */}
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: 20}}
+          renderScrollComponent={(props) => <ScrollView {...props} />}
+          data={data}
+          style={{}}
+          renderItem={({item}) => {
+            // console.log('dataaa', data);
+            // console.log('item', item);
+            return (
+              <View>
+                {item.sell ? (
+                  <FoodCard>
+                    {/* {props.imageUrl.uri ?} */}
+                    <TouchableOpacity
+                      onPress={() => props.navigation.navigate('Rent', {item})}>
+                      <Image
+                        // source={item.imageUrl}
+                        source={{uri: item.imageUrl}}
+                        style={{width: 200, height: 200, borderRadius: 10}}
+                        resizeMode="cover"
+                      />
+                      <Text style={{padding: 5, fontWeight: 'bold'}}>
+                        {item.price}
+                      </Text>
+                      <Text style={{padding: 5, color: '#C6C6C6'}}>
+                        {item.title}
+                      </Text>
+                      {/* {item.sell == true ? ( */}
+                      <Text style={{color: '#C6C6C6', padding: 5}}>
+                        apartment for sale
+                      </Text>
+                      <TouchableOpacity>
+                        <Ionicons
+                          name="heart-outline"
+                          size={30}
+                          onPress={() => Favourite(item)}
+                        />
+                      </TouchableOpacity>
+                      {/* ) : ( */}
+                      {/* <Text style={{color: '#C6C6C6', padding: 5}}>
+                          apartment for rent
+                        </Text> */}
+                      {/* )} */}
+                    </TouchableOpacity>
+                  </FoodCard>
+                ) : null}
+              </View>
+            );
+          }}
+        />
+        {/* ) : ( */}
+
         <TouchableOpacity
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: 'green',
-            padding: 5,
+            backgroundColor: '#000',
+            padding: 10,
             margin: 5,
             width: 140,
             borderRadius: 10,
             alignSelf: 'center',
-            marginTop: 10,
+            marginTop: 50,
           }}
           onPress={() => props.navigation.navigate('Add')}>
-          <Text>Add property</Text>
+          <Text style={{fontWeight: 'bold', fontSize: 16, color: '#fff'}}>
+            Add property
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: 'green',
-            padding: 5,
+            backgroundColor: '#000',
+            padding: 10,
+            margin: 5,
+            width: 140,
+            borderRadius: 10,
+            alignSelf: 'center',
+            marginTop: 50,
+          }}
+          onPress={() => props.navigation.navigate('favourites')}>
+          <Text style={{fontWeight: 'bold', fontSize: 16, color: '#fff'}}>
+            Favourite
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#000',
+            padding: 10,
             margin: 5,
             width: 140,
             borderRadius: 10,
@@ -260,60 +268,16 @@ const MainScreen = (props) => {
             marginTop: 10,
           }}
           onPress={handleLogout}>
-          <Text>Logout</Text>
+          <Text style={{fontWeight: 'bold', fontSize: 16, color: '#fff'}}>
+            Logout
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 
   const ThirdRoute = () => (
-    <View style={{flex: 1, backgroundColor: 'white'}}>
-      <FlatList
-        // data={orderData1}
-        // style={{marginBottom:29}}
-        contentContainerStyle={{paddingBottom: 20}}
-        renderItem={({item, separators, index}) => {
-          return (
-            <TouchableOpacity
-              // onPress={() => this.props.navigation.navigate("OrderDetail", { itemData: item })}
-              style={{
-                paddingTop: 10,
-                backgroundColor: '#FFF',
-                marginTop: 40,
-                width: '90%',
-                alignSelf: 'center',
-                borderRadius: 20,
-                shadowOffset: {width: 0.5, height: 0.5},
-                shadowOpacity: 0.2,
-                elevation: 5,
-              }}>
-              <View
-                style={{
-                  marginLeft: 20,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginRight: 20,
-                }}>
-                {/* <Text style={{ fontSize: 20, fontWeight: "bold" }}>{item.orderNo}</Text> */}
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: 'red',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 7,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{color: 'white', fontWeight: 'bold'}}>
-                    Availabale
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {/* <OrderCard item={item} /> */}
-            </TouchableOpacity>
-          );
-        }}
-      />
-    </View>
+    <View style={{flex: 1, backgroundColor: 'white'}}></View>
   );
 
   const renderScene = SceneMap({
@@ -365,7 +329,7 @@ const MainScreen = (props) => {
   const [index, setIndex] = useState(0);
   return (
     <View style={{flex: 1, backgroundColor: '#fff', padding: 10}}>
-      <Search />
+      <Search onChangeText={updateSearch} value={search} />
 
       <TabView
         navigationState={{index, routes}}
@@ -379,18 +343,9 @@ const MainScreen = (props) => {
 };
 const mapStateToProps = ({auth}) => {
   const {user} = auth;
-  // const {city, area, description, title, bed, bath, price, contact} = property;
 
   return {
     user,
-    // city,
-    // area,
-    // description,
-    // title,
-    // bed,
-    // bath,
-    // price,
-    // contact,
   };
 };
 export default connect(mapStateToProps, {logout})(MainScreen);

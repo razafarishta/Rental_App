@@ -14,7 +14,8 @@ const SplashScreen = (props) => {
       // }
       if (!props.user) {
         AsyncStorage.getItem('userData').then((response) => {
-          console.log(response);
+          console.log('userr', response);
+
           if (response) {
             response = JSON.parse(response);
             if (response) {

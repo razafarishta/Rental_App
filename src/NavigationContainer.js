@@ -24,6 +24,7 @@ import NotificationScreen from './screens/Tabs/NotificationScreen';
 import ProfileScreen from './screens/Tabs/ProfileScreen';
 import AddProperty from './screens/AddProperty';
 import RentDetail from './screens/Tabs/RentDetail';
+import FavouriteScreen from './screens/FavouriteScreen';
 const Navigation = () => {
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -38,6 +39,7 @@ const Navigation = () => {
           name="Main"
           component={MainScreen}
           options={{
+            // title="",
             tabBarIcon: () => <Feather name="home" size={30} />,
           }}
         />
@@ -45,6 +47,7 @@ const Navigation = () => {
           name="Filter"
           component={FilterScreen}
           options={{
+            title: 'Filter',
             tabBarIcon: () => (
               <Image
                 source={require('./assets/filter.png')}
@@ -124,6 +127,12 @@ const Navigation = () => {
           component={RentDetail}
           options={{headerShown: true}}
         />
+        <Stack.Screen
+          name="Filter"
+          component={FilterScreen}
+          options={{headerShown: true, title: 'Filter'}}
+        />
+        <Stack.Screen name="favourites" component={FavouriteScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
